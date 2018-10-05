@@ -1,0 +1,26 @@
+language: php
+
+php:
+  - 7.2
+
+services:
+  - mysql
+
+before_install:
+  - mysql -e 'CREATE DATABASE homestead CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;'
+
+
+before_script:
+  - composer self-update
+  - composer install --no-interaction --no-progress --no-suggest
+  - chmod -R 775 storage/
+  - chmod -R 775 bootstrap/cache/
+  - cp .env.example .env
+  - sudo apt-get install -y nodejs
+  - npm install --global yarn
+  - yarn
+  - npm run production
+  - php artisan migrate:fresh --seed
+
+script:
+  - vendor/bin/phpunit

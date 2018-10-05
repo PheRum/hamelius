@@ -1,133 +1,60 @@
 <?php
+
 /**
- * Laravel - A clean and classy framework for PHP web development.
+ * Laravel - A PHP Framework For Web Artisans
  *
  * @package  Laravel
- * @version  1.0.0 Beta 1
- * @author   Taylor Otwell
- * @license  MIT License
- * @link     http://laravel.com 
+ * @author   Taylor Otwell <taylor@laravel.com>
  */
 
-// --------------------------------------------------------------
-// Set the framework starting time.
-// --------------------------------------------------------------
 define('LARAVEL_START', microtime(true));
 
-// --------------------------------------------------------------
-// Define the framework paths.
-// --------------------------------------------------------------
-define('APP_PATH', realpath('../application').'/');
-define('SYS_PATH', realpath('../system').'/');
-define('BASE_PATH', realpath('../').'/');
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| our application. We just need to utilize it! We'll simply require it
+| into the script here so that we don't have to worry about manual
+| loading any of our classes later on. It feels great to relax.
+|
+*/
 
-// --------------------------------------------------------------
-// Define the PHP file extension.
-// --------------------------------------------------------------
-define('EXT', '.php');
+require __DIR__.'/../vendor/autoload.php';
 
-// --------------------------------------------------------------
-// Load the configuration and string classes.
-// --------------------------------------------------------------
-require SYS_PATH.'config'.EXT;
-require SYS_PATH.'str'.EXT;
+/*
+|--------------------------------------------------------------------------
+| Turn On The Lights
+|--------------------------------------------------------------------------
+|
+| We need to illuminate PHP development, so let us turn on the lights.
+| This bootstraps the framework and gets it ready for use, then it
+| will load up this application so that we can run it and send
+| the responses back to the browser and delight our users.
+|
+*/
 
-// --------------------------------------------------------------
-// Register the auto-loader.
-// --------------------------------------------------------------
-spl_autoload_register(require SYS_PATH.'loader'.EXT);
+$app = require_once __DIR__.'/../bootstrap/app.php';
 
-// --------------------------------------------------------------
-// Set the Laravel starting time in the Benchmark class.
-// --------------------------------------------------------------
-System\Benchmark::$marks['laravel'] = LARAVEL_START;
+/*
+|--------------------------------------------------------------------------
+| Run The Application
+|--------------------------------------------------------------------------
+|
+| Once we have the application, we can handle the incoming request
+| through the kernel, and send the associated response back to
+| the client's browser allowing them to enjoy the creative
+| and wonderful application we have prepared for them.
+|
+*/
 
-// --------------------------------------------------------------
-// Set the error reporting level.
-// --------------------------------------------------------------
-error_reporting((System\Config::get('error.detail')) ? E_ALL | E_STRICT : 0);
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-// --------------------------------------------------------------
-// Register the error handlers.
-// --------------------------------------------------------------
-set_exception_handler(function($e)
-{
-	System\Error::handle($e);	
-});
+$response = $kernel->handle(
+    $request = Illuminate\Http\Request::capture()
+);
 
-set_error_handler(function($number, $error, $file, $line) 
-{
-	System\Error::handle(new ErrorException($error, 0, $number, $file, $line));
-});
-
-register_shutdown_function(function()
-{
-	if ( ! is_null($error = error_get_last()))
-	{
-		System\Error::handle(new ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']));
-	}	
-});
-
-// --------------------------------------------------------------
-// Set the default timezone.
-// --------------------------------------------------------------
-date_default_timezone_set(System\Config::get('application.timezone'));
-
-// --------------------------------------------------------------
-// Load the session.
-// --------------------------------------------------------------
-if (System\Config::get('session.driver') != '')
-{
-	System\Session::load();
-}
-
-// --------------------------------------------------------------
-// Execute the global "before" filter.
-// --------------------------------------------------------------
-$response = System\Filter::call('before');
-
-// --------------------------------------------------------------
-// Only execute the route function if the "before" filter did
-// not override by sending a response.
-// --------------------------------------------------------------
-if (is_null($response))
-{
-	// ----------------------------------------------------------
-	// Route the request to the proper route.
-	// ----------------------------------------------------------
-	$route = System\Router::route(Request::method(), Request::uri());
-
-	// ----------------------------------------------------------
-	// Execute the route function.
-	// ----------------------------------------------------------
-	if ( ! is_null($route))
-	{
-		$response = $route->call();	
-	}
-	else
-	{
-		$response = System\Response::view('error/404', 404);
-	}
-}
-else
-{
-	$response = ( ! $response instanceof System\Response) ? new System\Response($response) : $response;
-}
-
-// ----------------------------------------------------------
-// Execute the global "after" filter.
-// ----------------------------------------------------------
-System\Filter::call('after', array($response));
-
-// --------------------------------------------------------------
-// Close the session.
-// --------------------------------------------------------------
-if (System\Config::get('session.driver') != '')
-{
-	System\Session::close();
-}
-
-// --------------------------------------------------------------
-// Send the response to the browser.
-// --------------------------------------------------------------
 $response->send();
+
+$kernel->terminate($request, $response);
