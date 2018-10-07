@@ -31,3 +31,10 @@ Route::group(['prefix' => 'furniture', 'middleware' => ['auth']], function () {
     Route::patch('{furniture}/update', 'FurnitureController@update')->name('furniture.update');
     Route::delete('{furniture}/delete', 'FurnitureController@destroy')->name('furniture.delete');
 });
+
+/**
+ * Категории
+ */
+Route::group(['prefix' => 'categories'], function () {
+    Route::get('/', 'CategoryController@index')->name('category.index');
+});

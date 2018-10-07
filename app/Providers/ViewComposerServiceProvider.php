@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
 use App\Models\Furniture;
 use App\Models\Process;
 use App\Models\Status;
@@ -80,6 +81,20 @@ class ViewComposerServiceProvider extends ServiceProvider
                 'furniture' => $data,
                 'furnitureFileds' => $data->pluck('title', 'id')->toArray(),
             ]);
+        });
+
+
+        /**
+         * Категории
+         */
+        view()->composer(['*'], function () {
+            /** @var \Illuminate\Support\Collection $data */
+            $data = cache()->remember('view-categories', 60, function () {
+                /** @noinspection PhpUndefinedMethodInspection */
+                return Category::all()->toTree();
+            });
+
+            view()->share(['categories' => $data]);
         });
     }
 }
