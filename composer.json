@@ -15,6 +15,7 @@
         "laravelcollective/html": "^5.7"
     },
     "require-dev": {
+        "doctrine/dbal": "^2.8",
         "beyondcode/laravel-dump-server": "^1.0",
         "filp/whoops": "^2.0",
         "fzaninotto/faker": "^1.4",
@@ -58,7 +59,9 @@
         "post-update-cmd": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "Illuminate\\Foundation\\ComposerScripts::postUpdate",
-            "php artisan ide-helper:generate"
+            "php artisan clear-compiled",
+            "php artisan ide-helper:generate",
+            "php artisan ide-helper:models --write"
         ]
     },
     "config": {
